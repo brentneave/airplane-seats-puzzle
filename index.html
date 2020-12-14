@@ -1,0 +1,73 @@
+<html>
+  <head>
+    <title>How many steps until stable seating configuration?</title>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <script language="javascript">
+
+      const occupied = '#'
+      const empty = 'L'
+      const floor = '.'
+
+      const seats = [
+        ['L','.','L','L','.','L','L','.','L','L'],
+        ['L','L','L','L','L','L','L','.','L','L'],
+        ['L','.','L','.','L','.','.','L','.','.'],
+        ['L','L','L','L','.','L','L','.','L','L'],
+        ['L','.','L','L','.','L','L','.','L','L'],
+        ['L','.','L','L','L','L','L','.','L','L'],
+        ['.','.','L','.','L','.','.','.','.','.'],
+        ['L','L','L','L','L','L','L','L','L','L'],
+        ['L','.','L','L','L','L','L','L','.','L'],
+        ['L','.','L','L','L','L','L','.','L','L'],
+      ]
+
+      const getSeat = (seats, x, y) =>
+        seats[y] && seats[y][x]
+          ? seats[y][x] 
+          : undefined
+
+      const getNeighbours = (seats, x, y) => [
+        getSeat(seats, x-1, y-1),
+        getSeat(seats, x,   y-1),
+        getSeat(seats, x+1, y-1),
+        getSeat(seats, x-1, y),
+        getSeat(seats, x+1, y),
+        getSeat(seats, x-1, y+1),
+        getSeat(seats, x,   y+1),
+        getSeat(seats, x+1, y+1),
+      ].filter(s => s)
+
+      const countMatchingNeighbours = (seats,x,y,match) => 
+        getNeighbours(seats,x,y).filter(s => s === match).length
+
+      const nextSeatState = (seats,x,y) => 
+        seats[y][x] === empty && countMatchingNeighbours(seats,x,y,occupied) === 0
+          ? occupied
+          : seats[x][y] === occupied && countMatchingNeighbours(seats,x,y,occupied) >= 4
+            ? empty
+            : seats[y][x]
+
+      const nextState = seats => seats.map(
+        (row, y) =>
+          row.map(
+            (seat, x) => nextSeatState(seats, x, y)
+          )
+      )
+
+      const countSteps = (seats, count = 0, previous) => {
+        console.log('\n', 'step ', count)
+        previous && console.log('previous', previous.flat().join())
+        console.log('seats   ', seats.flat().join())
+        console.log('stable? ', previous && seats.flat().join() === previous.flat().join())
+        return previous && seats.flat().join() === previous.flat().join()
+          ? count
+          : countSteps(nextState(seats), count + 1, seats)
+      }
+
+      console.log('\n', countSteps(seats), ' steps until stable seating configuration.')
+
+    </script>
+  </body>
+</html>
